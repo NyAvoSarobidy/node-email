@@ -1,57 +1,68 @@
+
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
+const PORT = 3001;
 
-// 🔹 Active CORS pour toutes les origines
+// Middleware
+app.use(express.json());
 app.use(cors({ origin: '*' }));
 
-// 🔹 Parse les requêtes JSON
-app.use(bodyParser.json());
 
-// ✅ Vérifier que le backend fonctionne
 app.get('/', (req, res) => {
     res.send('Serveur en ligne 🚀');
 });
 
-// 📩 Route pour envoyer un email
+// Route pour l'envoi d'email
 app.post('/send-email', async (req, res) => {
-    try {
-        const { nom, email, telephone, poste, message } = req.body;
+    const { nom, email, telephone, poste, message } = req.body;
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
+    if (!nom || !email || !telephone || !poste) {
+        return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
+    }
+
+    try {
+        // Configuration du transporteur SMTP
+        let transporter = nodemailer.createTransport({
+            host: "ssl0.ovh.net",
+            port: 465,
+            secure: true,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
+                user: "cabinet@orthosto.com",
+                pass: "votre-mot-de-passe"
+            }
         });
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: 'destinataire@example.com', // Remplace par ton adresse
-            subject: `Message de ${nom} - ${poste}`,
-            text: `Nom: ${nom}\nEmail: ${email}\nTéléphone: ${telephone}\nMessage: ${message}`,
+
+        // Contenu de l'email
+        let mailOptions = {
+            from: email,
+            to: 'cabinet@orthosto.com',
+            subject: `Nouvelle candidature - ${poste}`,
+            html: `
+                <h3>Nouvelle candidature</h3>
+                <p><strong>Nom :</strong> ${nom}</p>
+                <p><strong>Email :</strong> ${email}</p>
+                <p><strong>Téléphone :</strong> ${telephone}</p>
+                <p><strong>Poste :</strong> ${poste}</p>
+                <p><strong>Message :</strong> ${message ? message : 'Aucun message fourni'}</p>
+            `
         };
 
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'Email envoyé avec succès !' });
+        // Envoi de l'email
+        let info = await transporter.sendMail(mailOptions);
+        console.log('Email envoyé :', info.response);
+
+        res.status(200).json({ message: 'Votre candidature a bien été envoyée.' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erreur lors de l’envoi du message.' });
+        console.error('Erreur lors de l envoi de lemail :', error);
+        res.status(500).json({ message: 'Erreur lors de l envoi du message.' });
     }
 });
 
-// 🛑 Gérer les routes inexistantes
-app.use((req, res) => {
-    res.status(404).json({ message: 'Route non trouvée' });
-});
-
-// 🚀 Lancer le serveur sur le bon port
-const PORT = process.env.PORT || 3001;
+// Démarrer le serveur
 app.listen(PORT, () => {
-    console.log(`Serveur démarré sur http://localhost:${PORT}`);
+    console.log(`Serveur en cours d'exécution sur http://localhost:${PORT}`);
 });
