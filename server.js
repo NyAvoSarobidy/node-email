@@ -49,7 +49,7 @@ app.post('/send-email', async (req, res) => {
 
         // Contenu de l'email
         let mailOptions = {
-            from: email,
+            from: 'no-reply@orthosto.com',
             to: 'cabinet@orthosto.com',
             subject: `Nouvelle candidature - ${poste}`,
             html: `
