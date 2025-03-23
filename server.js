@@ -1,16 +1,14 @@
-
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3001;
 
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: '*' }));
 
-
+// Route de base pour vérifier le serveur
 app.get('/', (req, res) => {
     res.send('Serveur en ligne 🚀');
 });
@@ -31,10 +29,9 @@ app.post('/send-email', async (req, res) => {
             secure: true,
             auth: {
                 user: "cabinet@orthosto.com",
-                pass: "votre-mot-de-passe"
+                pass: "Orthosto2025"
             }
         });
-
 
         // Contenu de l'email
         let mailOptions = {
@@ -62,7 +59,5 @@ app.post('/send-email', async (req, res) => {
     }
 });
 
-// Démarrer le serveur
-app.listen(PORT, () => {
-    console.log(`Serveur en cours d'exécution sur http://localhost:${PORT}`);
-});
+// Exporte l'application Express pour que Vercel puisse l'utiliser
+module.exports = app;
