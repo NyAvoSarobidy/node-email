@@ -213,5 +213,67 @@ app.post('/contact', async (req, res) => {
     }
 });
 
+
+app.options('/Prendre-RDV', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(200).send();
+});
+
+app.post('/Prendre-RDV', async (req, res) => {
+    // Ajouter les en-têtes CORS
+    res.header('Access-Control-Allow-Origin', '*'); // Autorise toutes les origines
+    res.header('Access-Control-Allow-Methods', 'POST'); // Autorise la méthode POST
+    res.header('Access-Control-Allow-Headers', 'Content-Type'); // Autorise l'en-tête Content-Type
+
+    const { nom, prenom, email, telephone, motif, remarques, carteVitale, courrierDentiste, ordonnance } = req.body;
+
+    // Validation des champs obligatoires
+    if (!nom || !prenom || !email || !telephone || !motif || !carteVitale) {
+        return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
+    }
+
+    try {
+        // Configuration du transporteur SMTP
+        let transporter = nodemailer.createTransport({
+            host: "ssl0.ovh.net",
+            port: 465,
+            secure: true,
+            auth: {
+                user: "cabinet@orthosto.com",
+                pass: "Orthosto2025"
+            }
+        });
+
+        // Contenu de l'email
+        let mailOptions = {
+            from: 'no-reply@orthosto.com', // ou une adresse email fixe
+            to: 'cabinet@orthosto.com',
+            subject: 'NOUVELLE DEMANDE DE RENDEZ-VOUS',
+            html: `
+                <h3>Nouvelle demande de rendez-vous</h3>
+                <p><strong>Nom :</strong> ${nom}</p>
+                <p><strong>Prénom :</strong> ${prenom}</p>
+                <p><strong>Email :</strong> ${email}</p>
+                <p><strong>Téléphone :</strong> ${telephone}</p>
+                <p><strong>Motif :</strong> ${motif}</p>
+                <p><strong>Remarques :</strong> ${remarques}</p>
+                <p><strong>Carte Vitale :</strong> ${carteVitale}</p>
+                <p><strong>Courrier du dentiste :</strong> ${courrierDentiste}</p>
+                <p><strong>Ordonnance :</strong> ${ordonnance}</p>
+            `
+        };
+
+        // Envoi de l'email
+        let info = await transporter.sendMail(mailOptions);
+        console.log('Email envoyé :', info.response);
+
+        res.status(200).json({ message: 'Votre demande de rendez-vous a bien été envoyée.' });
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi de l\'email :', error);
+        res.status(500).json({ message: 'Erreur lors de l\'envoi du message.' });
+    }
+});
 // Exporte l'application Express pour que Vercel puisse l'utiliser
 module.exports = app;
