@@ -59,6 +59,15 @@ app.post('/send-email', async (req, res) => {
     }
 });
 
+// Gestion de la requête OPTIONS (pré-vol)
+app.options('/Enquette', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(200).send();
+});
+
+
 app.post('/Enquette', async (req, res) => {
     // Ajouter les en-têtes CORS
     res.header('Access-Control-Allow-Origin', '*'); // Autorise toutes les origines
