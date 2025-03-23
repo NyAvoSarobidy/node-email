@@ -67,16 +67,16 @@ app.post('/Enquette', async (req, res) => {
     }
 
     try {
-        // Configuration du transporteur SMTP
-        let transporter = nodemailer.createTransport({
-            host: "ssl0.ovh.net",
-            port: 465,
-            secure: true,
-            auth: {
-                user: "cabinet@orthosto.com",
-                pass: "Orthosto2025"
-            }
-        });
+            // Configuration du transporteur SMTP
+            let transporter = nodemailer.createTransport({
+                host: "ssl0.ovh.net",
+                port: 465,
+                secure: true,
+                auth: {
+                    user: "cabinet@orthosto.com",
+                    pass: "Orthosto2025"
+                }
+            });
         // Contenu de l'email
         let mailOptions = {
             from: email,
