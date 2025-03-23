@@ -59,7 +59,12 @@ app.post('/send-email', async (req, res) => {
     }
 });
 
-app.post('/enquette', async (req, res) => {
+app.post('/Enquette', async (req, res) => {
+    // Ajouter les en-têtes CORS
+    res.header('Access-Control-Allow-Origin', '*'); // Autorise toutes les origines
+    res.header('Access-Control-Allow-Methods', 'POST'); // Autorise la méthode POST
+    res.header('Access-Control-Allow-Headers', 'Content-Type'); // Autorise l'en-tête Content-Type
+
     const { date, Choix, Raison, Cabinet, Accueil, Recommandation, Commentaires } = req.body;
 
     if (!date || !Choix || !Raison || !Cabinet || !Accueil || !Recommandation) {
@@ -78,20 +83,41 @@ app.post('/enquette', async (req, res) => {
             }
         });
 
-        // Contenu de l'email
         let mailOptions = {
-            from: req.body.email,  // Il semble que vous deviez envoyer un email depuis le formulaire, ajoutez ce champ.
+            from: 'no-reply@orthosto.com', // ou une adresse email fixe
             to: 'cabinet@orthosto.com',
             subject: 'ENQUETE DE SATISFACTION',
             html: `
                 <h3>Nouvelle enquête de satisfaction</h3>
                 <p><strong>Date :</strong> ${date}</p>
-                <p><strong>Choix :</strong> ${Choix.join(', ')}</p>
-                <p><strong>Raison :</strong> ${Raison}</p>
-                <p><strong>Cabinet :</strong> ${Cabinet.join(', ')}</p>
+                
+                <h4>1. Pourquoi avez-vous choisi notre cabinet dentaire ?</h4>
+                <p><strong>Choix :</strong></p>
+                <ul>
+                    ${Choix.map(option => `<li>${option}</li>`).join('')}
+                </ul>
+                
+                <div>
+                    <strong>La raison la plus importante :</strong>
+                    <p>${Raison}</p>
+                </div>
+        
+                <h4>2. Comment avez-vous connu notre cabinet dentaire ?</h4>
+                <p><strong>Sources :</strong></p>
+                <ul>
+                    ${Cabinet.map(option => `<li>${option}</li>`).join('')}
+                </ul>
+        
+                <h4>3. Comment avez-vous trouvé l'accueil téléphonique ?</h4>
                 <p><strong>Accueil :</strong> ${Accueil}</p>
+        
+                <h4>4. Recommanderiez-vous notre cabinet ?</h4>
                 <p><strong>Recommandation :</strong> ${Recommandation}</p>
-                <p><strong>Commentaires :</strong> ${Commentaires}</p>
+        
+                <div>
+                    <strong>Commentaires :</strong>
+                    <p>${Commentaires}</p>
+                </div>
             `
         };
 
@@ -105,7 +131,6 @@ app.post('/enquette', async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de l envoi du message.' });
     }
 });
-
 
 // Exporte l'application Express pour que Vercel puisse l'utiliser
 module.exports = app;
